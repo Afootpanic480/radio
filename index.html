@@ -2,179 +2,383 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Shared Spotify Radio</title>
+  <title>SSNetwork Radio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0b0c10;
-      color: #f2f2f2;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      color: #f9fafb;
+    }
+
+    .page {
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      margin: 0;
+      padding: 16px;
     }
+
     .card {
-      background: #15171f;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      max-width: 480px;
       width: 100%;
+      max-width: 640px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 20px;
+      padding: 20px 20px 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
     }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
     h1 {
+      margin: 0;
       font-size: 1.6rem;
-      margin: 0 0 4px;
     }
+
     .subtitle {
+      margin: 2px 0 0;
       font-size: 0.9rem;
-      color: #a0a4b8;
-      margin-bottom: 16px;
+      color: #9ca3af;
     }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(30, 64, 175, 0.2);
+      color: #dbeafe;
+      border: 1px solid rgba(129, 140, 248, 0.7);
+    }
+
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 4px;
+      padding: 10px 8px 14px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .cover-wrapper {
+      flex-shrink: 0;
+    }
+
+    .cover {
+      width: 96px;
+      height: 96px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .track-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .track-title {
+      font-size: 1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .track-artist {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-top: 2px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .time-text {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      width: 34px;
+      text-align: center;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(31, 41, 55, 0.9);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #16a34a, #4ade80);
+      transition: width 0.25s linear;
+    }
+
+    .controls {
+      margin-top: 14px;
+    }
+
     label {
       font-size: 0.9rem;
       display: block;
       margin: 8px 0 4px;
     }
+
     input[type="text"] {
       width: 100%;
       padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #2a2d3a;
-      background: #10121a;
-      color: #f2f2f2;
-      box-sizing: border-box;
+      border-radius: 10px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.92rem;
     }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.6);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+      gap: 6px;
+    }
+
     input[type="checkbox"] {
       transform: scale(1.1);
-      margin-right: 6px;
     }
-    button {
-      padding: 10px 16px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      margin-right: 8px;
-      margin-top: 12px;
-      background: #1db954;
-      color: #0b0c10;
-    }
-    button.secondary {
-      background: #262a38;
-      color: #f2f2f2;
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
+
     .row {
       display: flex;
       align-items: center;
-      margin-top: 8px;
       gap: 8px;
       flex-wrap: wrap;
+      margin-top: 8px;
     }
+
+    button {
+      padding: 8px 15px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.92rem;
+      background: #22c55e;
+      color: #022c22;
+      font-weight: 500;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    button.secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(16, 185, 129, 0.25);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      box-shadow: 0 8px 14px rgba(15, 23, 42, 0.9);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
     .status {
-      margin-top: 14px;
-      font-size: 0.85rem;
-      color: #a0a4b8;
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #9ca3af;
       min-height: 1.4em;
     }
-    .small {
-      font-size: 0.8rem;
-      color: #7b7f95;
-      margin-top: 10px;
-      line-height: 1.4;
+
+    .help-text {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #6b7280;
     }
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      background: #262a38;
-      color: #c4c7dd;
-      margin-left: 6px;
+
+    code {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 2px 4px;
+      border-radius: 6px;
+      font-size: 0.78rem;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Shared Spotify Radio</h1>
-    <div class="subtitle">
-      One playlist, synced for everyone listening right now.
-    </div>
+  <div class="page">
+    <div class="card">
+      <header class="header">
+        <div>
+          <h1>SSNetwork Radio</h1>
+          <p class="subtitle">Shared Spotify playlist synced across devices.</p>
+        </div>
+        <span class="badge" id="roomLabel">Room: main</span>
+      </header>
 
-    <label for="playlist">Spotify playlist URI</label>
-    <input
-      id="playlist"
-      type="text"
-      placeholder="Example: spotify:playlist:YOUR_PLAYLIST_ID"
-    />
+      <section class="now-playing">
+        <div class="cover-wrapper">
+          <img
+            id="trackImage"
+            class="cover"
+            src="https://via.placeholder.com/96?text=%E2%99%AB"
+            alt="Album art"
+          />
+        </div>
+        <div class="track-info">
+          <div id="trackTitle" class="track-title">Nothing playing</div>
+          <div id="trackArtist" class="track-artist"></div>
+          <div class="progress-row">
+            <div class="time-text" id="currentTime">0:00</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-text" id="totalTime">0:00</div>
+          </div>
+        </div>
+      </section>
 
-    <div class="row" style="margin-top: 10px;">
-      <label style="margin: 0; display: flex; align-items: center;">
-        <input type="checkbox" id="djToggle" />
-        I am the DJ on this device
-      </label>
-      <span class="badge" id="roomLabel">Room: default</span>
-    </div>
+      <section class="controls">
+        <label for="playlist">Spotify playlist URI</label>
+        <input
+          id="playlist"
+          type="text"
+          placeholder="Example: spotify:playlist:YOUR_PLAYLIST_ID"
+        />
 
-    <div class="row">
-      <button id="loginBtn">Login to Spotify</button>
-      <button id="playBtn" disabled>Play or resume</button>
-      <button id="pauseBtn" class="secondary" disabled>Pause</button>
-      <button id="syncBtn" class="secondary" disabled>Sync now</button>
-    </div>
+        <div class="row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="djToggle" />
+            I am the DJ on this device
+          </label>
+        </div>
 
-    <div class="status" id="status">Waiting for Spotify SDK...</div>
+        <div class="row">
+          <button id="loginBtn">Login with Spotify</button>
+          <button id="startPlayerBtn" class="secondary">Start player</button>
+        </div>
 
-    <div class="small">
-      To test: paste a playlist URI, mark yourself as DJ, login, hit play, then open the page on another device with the same room id.
+        <div class="row">
+          <button id="playBtn" disabled>Play or resume</button>
+          <button id="pauseBtn" class="secondary" disabled>Pause</button>
+          <button id="syncBtn" class="secondary" disabled>Sync now</button>
+        </div>
+
+        <div class="status" id="status">Loading Spotify SDK...</div>
+
+        <p class="help-text">
+          To use a different room, append <code>#roomname</code> to the URL.<br />
+          Example: <code>https://radio.ssnetwork.site/#lobby</code>
+        </p>
+      </section>
     </div>
   </div>
 
-  <!-- Spotify Web Playback SDK -->
+  <!-- hook for the Spotify Web Playback SDK -->
+  <script>
+    window.spotifySDKLoaded = false;
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      window.spotifySDKLoaded = true;
+    };
+  </script>
   <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
-  <!-- Your app logic with Firebase and Spotify -->
+  <!-- main app: Spotify PKCE, Firebase, sync, now playing -->
   <script type="module">
-    // 1. Firebase setup
-    // Replace with your config from the Firebase console
+    /*****************************************
+     * 1. Spotify app settings
+     *****************************************/
+    const CLIENT_ID = "7be2edb9f99944ebb8796b889b1eb1bc";
+    const REDIRECT_URI = "https://radio.ssnetwork.site/";
+    const SCOPES =
+      "streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state";
+
+    /*****************************************
+     * 2. Firebase setup
+     *****************************************/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import {
       getDatabase,
       ref,
       onValue,
-      set,
-      serverTimestamp
+      set
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyD6TbGBSvGGymzxPGDXO_kmXHkBSRcudCE",
+      authDomain: "ssnetwork-b15f4.firebaseapp.com",
+      databaseURL: "https://ssnetwork-b15f4-default-rtdb.firebaseio.com",
+      projectId: "ssnetwork-b15f4",
+      storageBucket: "ssnetwork-b15f4.firebasestorage.app",
+      messagingSenderId: "851669400730",
+      appId: "1:851669400730:web:25e86bad2d26af0a38b323",
+      measurementId: "G-DN6LH24HF8"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const firebaseApp = initializeApp(firebaseConfig);
+    const db = getDatabase(firebaseApp);
 
-    // 2. Simple room support from URL hash, default "main"
+    /*****************************************
+     * 3. DOM references and state
+     *****************************************/
     const roomId = window.location.hash.replace("#", "") || "main";
-    document.getElementById("roomLabel").textContent = "Room: " + roomId;
 
     const statusEl = document.getElementById("status");
     const playlistInput = document.getElementById("playlist");
     const loginBtn = document.getElementById("loginBtn");
+    const startPlayerBtn = document.getElementById("startPlayerBtn");
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
     const syncBtn = document.getElementById("syncBtn");
     const djToggle = document.getElementById("djToggle");
+    const roomLabel = document.getElementById("roomLabel");
+
+    const trackImageEl = document.getElementById("trackImage");
+    const trackTitleEl = document.getElementById("trackTitle");
+    const trackArtistEl = document.getElementById("trackArtist");
+    const currentTimeEl = document.getElementById("currentTime");
+    const totalTimeEl = document.getElementById("totalTime");
+    const progressFillEl = document.getElementById("progressFill");
+
+    roomLabel.textContent = "Room: " + roomId;
 
     let isDj = false;
     let player;
@@ -182,50 +386,245 @@
     let accessToken = null;
     let currentStateFromCloud = null;
 
+    let autoSyncInterval = null;
+    let lastProgressUpdate = 0;
+    let lastPositionMs = 0;
+    let lastDurationMs = 0;
+    let progressTimer = null;
+
     djToggle.addEventListener("change", () => {
-      isDj = djToggle.checked;
-      updateStatus();
+      setDjMode(djToggle.checked);
     });
 
+    function setDjMode(value) {
+      isDj = value;
+      if (autoSyncInterval) {
+        clearInterval(autoSyncInterval);
+        autoSyncInterval = null;
+      }
+      if (isDj && player) {
+        startAutoSync();
+      }
+      updateStatus();
+    }
+
     function updateStatus(extra = "") {
-      let base = "Room " + roomId + " · ";
-      base += isDj ? "You are DJ" : "Listener only";
-      if (deviceId) base += " · Device ready";
-      if (extra) base += " · " + extra;
+      let base = "Room " + roomId + " / ";
+      base += isDj ? "DJ mode" : "Listener mode";
+      if (deviceId) base += " / Player ready";
+      if (extra) base += " / " + extra;
       statusEl.textContent = base;
     }
 
-    // 3. Spotify auth placeholder
-    // For quick testing you can paste a short lived access token here
-    // In real use, implement the Authorization Code with PKCE flow
-    // and return a valid token from this function.
-    function getSpotifyAccessToken() {
-      // Example for testing only:
-      // return "BQD....YOUR_TEMP_TOKEN";
-      return window.localStorage.getItem("spotify_access_token") || null;
+    /*****************************************
+     * 4. PKCE helpers
+     *****************************************/
+    function generateRandomString(length) {
+      const possible =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      const values = window.crypto.getRandomValues(new Uint8Array(length));
+      let output = "";
+      for (let i = 0; i < length; i++) {
+        output += possible[values[i] % possible.length];
+      }
+      return output;
     }
 
-    loginBtn.addEventListener("click", () => {
-      const token = getSpotifyAccessToken();
-      if (!token) {
-        alert(
-          "You need to plug your own Spotify login flow.\nStore the access token in localStorage under spotify_access_token or edit getSpotifyAccessToken() to return it."
-        );
+    async function sha256(plain) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plain);
+      return window.crypto.subtle.digest("SHA-256", data);
+    }
+
+    function base64UrlEncode(bytes) {
+      return btoa(String.fromCharCode(...new Uint8Array(bytes)))
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+    }
+
+    async function createCodeChallenge(verifier) {
+      const hashed = await sha256(verifier);
+      return base64UrlEncode(hashed);
+    }
+
+    function saveTokensToStorage(tokenData) {
+      const { access_token, refresh_token, expires_in } = tokenData;
+      const expiresAt = Date.now() + expires_in * 1000;
+      localStorage.setItem("spotify_access_token", access_token);
+      if (refresh_token) {
+        localStorage.setItem("spotify_refresh_token", refresh_token);
+      }
+      localStorage.setItem("spotify_token_expires_at", String(expiresAt));
+    }
+
+    async function exchangeCodeForToken(code) {
+      const verifier = localStorage.getItem("pkce_code_verifier");
+      if (!verifier) {
+        statusEl.textContent = "Missing PKCE verifier. Please login again.";
+        return null;
+      }
+
+      const body = new URLSearchParams({
+        client_id: CLIENT_ID,
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: REDIRECT_URI,
+        code_verifier: verifier
+      });
+
+      const res = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+
+      if (!res.ok) {
+        console.error("Token exchange failed", await res.text());
+        statusEl.textContent = "Spotify token exchange failed. Check console.";
+        return null;
+      }
+
+      const data = await res.json();
+      saveTokensToStorage(data);
+      return data.access_token;
+    }
+
+    function getStoredAccessTokenSync() {
+      const token = localStorage.getItem("spotify_access_token");
+      const expiresAtRaw = localStorage.getItem("spotify_token_expires_at");
+      if (!token || !expiresAtRaw) return null;
+      const expiresAt = parseInt(expiresAtRaw, 10);
+      if (Date.now() > expiresAt - 60000) return null;
+      return token;
+    }
+
+    async function refreshAccessTokenIfNeeded() {
+      const token = localStorage.getItem("spotify_access_token");
+      const expiresAtRaw = localStorage.getItem("spotify_token_expires_at");
+      const refreshToken = localStorage.getItem("spotify_refresh_token");
+
+      const expiresAt = expiresAtRaw ? parseInt(expiresAtRaw, 10) : 0;
+      const now = Date.now();
+
+      if (token && expiresAt > now + 60000) {
+        return token;
+      }
+
+      if (!refreshToken) {
+        return null;
+      }
+
+      const body = new URLSearchParams({
+        client_id: CLIENT_ID,
+        grant_type: "refresh_token",
+        refresh_token: refreshToken
+      });
+
+      const res = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+
+      if (!res.ok) {
+        console.error("Refresh failed", await res.text());
+        return null;
+      }
+
+      const data = await res.json();
+      saveTokensToStorage({
+        access_token: data.access_token,
+        refresh_token: refreshToken,
+        expires_in: data.expires_in
+      });
+      return data.access_token;
+    }
+
+    async function startSpotifyLogin() {
+      const verifier = generateRandomString(64);
+      const challenge = await createCodeChallenge(verifier);
+      const state = generateRandomString(16);
+
+      localStorage.setItem("pkce_code_verifier", verifier);
+      localStorage.setItem("pkce_state", state);
+
+      const params = new URLSearchParams({
+        response_type: "code",
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        redirect_uri: REDIRECT_URI,
+        state,
+        code_challenge_method: "S256",
+        code_challenge: challenge,
+        show_dialog: "true"
+      });
+
+      const authUrl =
+        "https://accounts.spotify.com/authorize?" + params.toString();
+      window.location.href = authUrl;
+    }
+
+    /*****************************************
+     * 5. Handle Spotify redirect
+     *****************************************/
+    async function handleRedirectCallbackIfPresent() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+      const state = urlParams.get("state");
+      const error = urlParams.get("error");
+
+      if (error) {
+        statusEl.textContent = "Spotify auth error: " + error;
         return;
       }
-      accessToken = token;
-      startSpotifyPlayer();
-    });
 
-    // 4. Start the Spotify Web Playback SDK player
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      statusEl.textContent = "Spotify SDK ready. Press Login to connect.";
-    };
+      if (!code) return;
+
+      const storedState = localStorage.getItem("pkce_state");
+      if (!storedState || storedState !== state) {
+        statusEl.textContent = "State mismatch. Please login again.";
+        return;
+      }
+
+      window.history.replaceState({}, "", REDIRECT_URI + window.location.hash);
+
+      statusEl.textContent = "Exchanging code for token...";
+      const newToken = await exchangeCodeForToken(code);
+      if (newToken) {
+        accessToken = newToken;
+        statusEl.textContent = "Spotify linked. Press Start player.";
+      }
+    }
+
+    /*****************************************
+     * 6. Spotify Web Playback SDK integration
+     *****************************************/
+    function waitForSpotifySDK() {
+      if (window.spotifySDKLoaded && window.Spotify) {
+        const token = getStoredAccessTokenSync();
+        if (token) {
+          statusEl.textContent =
+            "Spotify SDK ready. Press Start player to connect.";
+        } else {
+          statusEl.textContent =
+            "Spotify SDK ready. Press Login with Spotify first.";
+        }
+        return;
+      }
+      setTimeout(waitForSpotifySDK, 300);
+    }
+
+    waitForSpotifySDK();
 
     function startSpotifyPlayer() {
       if (!accessToken) {
-        statusEl.textContent = "No Spotify access token.";
-        return;
+        const storedToken = getStoredAccessTokenSync();
+        if (!storedToken) {
+          statusEl.textContent = "No valid Spotify token. Please login first.";
+          return;
+        }
+        accessToken = storedToken;
       }
 
       if (player) {
@@ -234,10 +633,8 @@
       }
 
       player = new Spotify.Player({
-        name: "GitHub Radio " + roomId,
-        getOAuthToken: cb => {
-          cb(accessToken);
-        },
+        name: "SSNetwork Radio " + roomId,
+        getOAuthToken: cb => cb(accessToken),
         volume: 0.8
       });
 
@@ -246,8 +643,9 @@
         playBtn.disabled = false;
         pauseBtn.disabled = false;
         syncBtn.disabled = false;
-        updateStatus("Spotify device " + device_id.slice(0, 6));
+        updateStatus("Device " + device_id.slice(0, 6));
         attachCloudListener();
+        if (isDj) startAutoSync();
       });
 
       player.addListener("not_ready", ({ device_id }) => {
@@ -261,7 +659,7 @@
 
       player.addListener("authentication_error", ({ message }) => {
         console.error(message);
-        statusEl.textContent = "Authentication error: " + message;
+        statusEl.textContent = "Authentication error. Try login again.";
       });
 
       player.addListener("account_error", ({ message }) => {
@@ -269,10 +667,17 @@
         statusEl.textContent = "Account error: " + message;
       });
 
+      player.addListener("player_state_changed", state => {
+        if (!state) return;
+        updateNowPlayingFromState(state);
+      });
+
       player.connect();
     }
 
-    // 5. Firebase sync logic
+    /*****************************************
+     * 7. Firebase sync for shared radio
+     *****************************************/
     const stateRef = ref(db, "radioRooms/" + roomId + "/state");
 
     function writeStateToCloud(localState) {
@@ -303,7 +708,6 @@
       if (!player || !deviceId || !accessToken) return;
       if (!state.playlistUri) return;
 
-      // Use Spotify Web API to start or pause playback for this browser device
       if (state.isPlaying) {
         await playPlaylistAtPosition(state.playlistUri, state.positionMs || 0);
       } else {
@@ -311,8 +715,53 @@
       }
     }
 
+    /*****************************************
+     * 8. Auto DJ sync loop
+     *****************************************/
+    function startAutoSync() {
+      if (!player) return;
+      if (autoSyncInterval) clearInterval(autoSyncInterval);
+
+      autoSyncInterval = setInterval(async () => {
+        if (!isDj) return;
+        const sdkState = await player.getCurrentState();
+        if (!sdkState) return;
+
+        const positionMs = sdkState.position || 0;
+        const durationMs =
+          sdkState.duration ||
+          (sdkState.track_window.current_track &&
+            sdkState.track_window.current_track.duration_ms) ||
+          0;
+
+        const uriFromContext =
+          sdkState.context && sdkState.context.uri
+            ? sdkState.context.uri
+            : null;
+
+        const uri =
+          playlistInput.value.trim() ||
+          uriFromContext ||
+          (currentStateFromCloud && currentStateFromCloud.playlistUri);
+
+        writeStateToCloud({
+          playlistUri: uri,
+          isPlaying: !sdkState.paused,
+          positionMs
+        });
+
+        updateProgress(positionMs, durationMs);
+      }, 5000);
+    }
+
+    /*****************************************
+     * 9. Web API helpers
+     *****************************************/
     async function playPlaylistAtPosition(playlistUri, positionMs) {
       if (!accessToken || !deviceId) return;
+
+      const freshToken = await refreshAccessTokenIfNeeded();
+      if (freshToken) accessToken = freshToken;
 
       try {
         const body = {
@@ -320,7 +769,8 @@
           position_ms: positionMs
         };
         await fetch(
-          "https://api.spotify.com/v1/me/player/play?device_id=" + encodeURIComponent(deviceId),
+          "https://api.spotify.com/v1/me/player/play?device_id=" +
+            encodeURIComponent(deviceId),
           {
             method: "PUT",
             headers: {
@@ -339,9 +789,14 @@
 
     async function pausePlayback() {
       if (!accessToken || !deviceId) return;
+
+      const freshToken = await refreshAccessTokenIfNeeded();
+      if (freshToken) accessToken = freshToken;
+
       try {
         await fetch(
-          "https://api.spotify.com/v1/me/player/pause?device_id=" + encodeURIComponent(deviceId),
+          "https://api.spotify.com/v1/me/player/pause?device_id=" +
+            encodeURIComponent(deviceId),
           {
             method: "PUT",
             headers: {
@@ -356,10 +811,96 @@
       }
     }
 
-    // 6. Button handlers for the DJ
+    /*****************************************
+     * 10. Now playing UI and progress
+     *****************************************/
+    function updateNowPlayingFromState(state) {
+      const track = state.track_window && state.track_window.current_track;
+      if (!track) {
+        trackTitleEl.textContent = "Nothing playing";
+        trackArtistEl.textContent = "";
+        updateProgress(0, 0);
+        return;
+      }
+
+      trackTitleEl.textContent = track.name || "Unknown title";
+      const artists = (track.artists || []).map(a => a.name).join(", ");
+      trackArtistEl.textContent = artists || "Unknown artist";
+
+      const image =
+        track.album && track.album.images && track.album.images[0]
+          ? track.album.images[0].url
+          : "https://via.placeholder.com/96?text=%E2%99%AB";
+      trackImageEl.src = image;
+
+      const durationMs = track.duration_ms || 0;
+      const positionMs = state.position || 0;
+      updateProgress(positionMs, durationMs);
+    }
+
+    function updateProgress(positionMs, durationMs) {
+      lastProgressUpdate = Date.now();
+      lastPositionMs = positionMs || 0;
+      lastDurationMs = durationMs || 0;
+
+      const percent =
+        durationMs > 0 ? Math.min(100, (positionMs / durationMs) * 100) : 0;
+      progressFillEl.style.width = percent + "%";
+
+      currentTimeEl.textContent = formatTime(positionMs);
+      totalTimeEl.textContent = formatTime(durationMs);
+
+      if (progressTimer) clearInterval(progressTimer);
+      if (durationMs > 0) {
+        progressTimer = setInterval(() => {
+          const elapsed = Date.now() - lastProgressUpdate;
+          const newPos = lastPositionMs + elapsed;
+          const p =
+            lastDurationMs > 0
+              ? Math.min(100, (newPos / lastDurationMs) * 100)
+              : 0;
+          progressFillEl.style.width = p + "%";
+          currentTimeEl.textContent = formatTime(newPos);
+          if (newPos >= lastDurationMs) {
+            clearInterval(progressTimer);
+          }
+        }, 1000);
+      }
+    }
+
+    function formatTime(ms) {
+      if (!ms || ms < 0) ms = 0;
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return minutes + ":" + String(seconds).padStart(2, "0");
+    }
+
+    /*****************************************
+     * 11. Button handlers
+     *****************************************/
+    loginBtn.addEventListener("click", async () => {
+      const token = getStoredAccessTokenSync();
+      if (token) {
+        accessToken = token;
+        statusEl.textContent = "You are already logged in to Spotify.";
+        return;
+      }
+      statusEl.textContent = "Sending you to Spotify login...";
+      await startSpotifyLogin();
+    });
+
+    startPlayerBtn.addEventListener("click", async () => {
+      if (!accessToken) {
+        const token = await refreshAccessTokenIfNeeded();
+        if (token) accessToken = token;
+      }
+      startSpotifyPlayer();
+    });
+
     playBtn.addEventListener("click", async () => {
       if (!isDj) {
-        alert("Only the DJ can send play commands to the room.");
+        alert("Only the DJ can send play commands.");
         return;
       }
       const uri = playlistInput.value.trim();
@@ -367,7 +908,7 @@
         alert("Enter a Spotify playlist URI first.");
         return;
       }
-      // Start from zero for now
+
       await playPlaylistAtPosition(uri, 0);
       writeStateToCloud({
         playlistUri: uri,
@@ -402,7 +943,10 @@
         return;
       }
       const positionMs = state.position || 0;
-      const uri = playlistInput.value.trim() || (currentStateFromCloud && currentStateFromCloud.playlistUri);
+      const uri =
+        playlistInput.value.trim() ||
+        (state.context && state.context.uri) ||
+        (currentStateFromCloud && currentStateFromCloud.playlistUri);
 
       writeStateToCloud({
         playlistUri: uri,
@@ -413,8 +957,18 @@
       updateStatus("Synced at " + Math.round(positionMs / 1000) + " seconds");
     });
 
-    // Initial status
-    updateStatus("Idle");
+    /*****************************************
+     * 12. Initial boot
+     *****************************************/
+    updateStatus("Booting...");
+    handleRedirectCallbackIfPresent().then(() => {
+      const storedToken = getStoredAccessTokenSync();
+      if (storedToken && !accessToken) {
+        accessToken = storedToken;
+        statusEl.textContent =
+          "Spotify token found. Press Start player to connect.";
+      }
+    });
   </script>
 </body>
 </html>
